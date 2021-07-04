@@ -1,0 +1,749 @@
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div id="Entropy" class="">
+                <h6>Entropy Plot</h6>
+                <script>
+                    // set the dimensions and margins of the graph
+                    var margin = {
+                            top: 30,
+                            right: 30,
+                            bottom: 30,
+                            left: 50
+                        },
+                        width = 460 - margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var svg = d3.select("#Entropy")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    // get the data
+                    d3.csv("https://raw.githubusercontent.com/DevilTrigg3r/ADN_Validate/main/Entropy.csv",
+                        function(data) {
+
+                            // add the x Axis
+                            var x = d3.scaleLinear().domain([-0.5, 4]).range([0, width]);
+                            svg.append("g").attr("transform", "translate(0," + height + ")")
+                                .call(d3.axisBottom(x));
+
+                            // add the y Axis
+                            var y = d3.scaleLinear().range([height, 0]).domain([0, 2.5]);
+                            svg.append("g").call(d3.axisLeft(y));
+
+                            // Compute kernel density estimation
+                            var kde = kernelDensityEstimator(kernelEpanechnikov(0.1), x.ticks(30))
+                            var entropy1 = kde(data.filter(function(d) {
+                                    return d.entropy === "entropy1"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+                            var entropy2 = kde(data.filter(function(d) {
+                                    return d.entropy === "entropy0"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+
+                            // Plot the area A
+                            svg.append("path")
+                                .attr("class", "mypath")
+                                .datum(entropy1)
+                                .attr("fill", "#60f233")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+
+                            // Plot the area B
+                            svg.append("path")
+                                .attr("class", "mypath")
+                                .datum(entropy2)
+                                .attr("fill", "#f5e72a")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+                        });
+
+                    // Handmade legend
+                    svg.append("circle").attr("cx", 300).attr("cy", 30).attr("r", 6).style("fill", "#60f233")
+                    svg.append("circle").attr("cx", 300).attr("cy", 60).attr("r", 6).style("fill", "#f5e72a")
+                    svg.append("text").attr("x", 320).attr("y", 30).text("Pathogenics").style("font-size", "15px").attr("alignment-baseline", "middle")
+                    svg.append("text").attr("x", 320).attr("y", 60).text("Neutral").style("font-size", "15px").attr("alignment-baseline", "middle")
+
+                    // Function to compute density
+                    function kernelDensityEstimator(kernel, X) {
+                        return function(V) {
+                            return X.map(function(x) {
+                                return [x, d3.mean(V, function(v) {
+                                    return kernel(x - v);
+                                })];
+                            });
+                        };
+                    }
+
+                    function kernelEpanechnikov(k) {
+                        return function(v) {
+                            return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+                        };
+                    }
+                </script>
+            </div>
+            <div id="pssm_native" class="">
+                <h6>Pssm_Native plot</h6>
+                <script>
+                    // set the dimensions and margins of the graph
+                    var margin = {
+                            top: 30,
+                            right: 30,
+                            bottom: 30,
+                            left: 50
+                        },
+                        width = 460 - margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var SVG = d3.select("#pssm_native")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    // get the data
+                    d3.csv("https://raw.githubusercontent.com/DevilTrigg3r/ADN_Validate/main/pssm_native.csv",
+                        function(data) {
+
+                            // add the x Axis
+                            var x = d3.scaleLinear().domain([-3, 8.5]).range([0, width]);
+                            SVG.append("g").attr("transform", "translate(0," + height + ")")
+                                .call(d3.axisBottom(x));
+
+                            // add the y Axis
+                            var y = d3.scaleLinear().range([height, 0]).domain([0, 0.8]);
+                            SVG.append("g").call(d3.axisLeft(y));
+
+                            // Compute kernel density estimation
+                            var kde = kernelDensityEstimator(kernelEpanechnikov(0.1), x.ticks(30))
+                            var pssm_native1 = kde(data.filter(function(d) {
+                                    return d.pssm_native === "pssm_native1"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+                            var pssm_native2 = kde(data.filter(function(d) {
+                                    return d.pssm_native === "pssm_native0"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+
+                            // Plot the area A
+                            SVG.append("path")
+                                .attr("class", "mypath")
+                                .datum(pssm_native1)
+                                .attr("fill", "#60f233")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+
+                            // Plot the area B
+                            SVG.append("path")
+                                .attr("class", "mypath")
+                                .datum(pssm_native2)
+                                .attr("fill", "#f5e72a")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+                        });
+
+                    // Handmade legend
+                    SVG.append("circle").attr("cx", 300).attr("cy", 30).attr("r", 6).style("fill", "#60f233")
+                    SVG.append("circle").attr("cx", 300).attr("cy", 60).attr("r", 6).style("fill", "#f5e72a")
+                    SVG.append("text").attr("x", 320).attr("y", 30).text("Pathogenics").style("font-size", "15px").attr("alignment-baseline", "middle")
+                    SVG.append("text").attr("x", 320).attr("y", 60).text("Neutral").style("font-size", "15px").attr("alignment-baseline", "middle")
+
+                    // Function to compute density
+                    function kernelDensityEstimator(kernel, X) {
+                        return function(V) {
+                            return X.map(function(x) {
+                                return [x, d3.mean(V, function(v) {
+                                    return kernel(x - v);
+                                })];
+                            });
+                        };
+                    }
+
+                    function kernelEpanechnikov(k) {
+                        return function(v) {
+                            return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+                        };
+                    }
+                </script>
+            </div>
+
+        </div>
+        <div class="col"></div>
+        <div class="col-6">
+            <div id="substitutionMatrix" class="">
+                <h6>Blosum62 plot</h6>
+                <script>
+                    // set the dimensions and margins of the graph
+                    var margin = {
+                            top: 30,
+                            right: 30,
+                            bottom: 30,
+                            left: 50
+                        },
+                        width = 460 - margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var SvG = d3.select("#substitutionMatrix")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    // get the data
+                    d3.csv("https://raw.githubusercontent.com/DevilTrigg3r/ADN_Validate/main/substitutionMatrix.csv",
+                        function(data) {
+
+                            // add the x Axis
+                            var x = d3.scaleLinear().domain([-5, 4.5]).range([0, width]);
+                            SvG.append("g").attr("transform", "translate(0," + height + ")")
+                                .call(d3.axisBottom(x));
+
+                            // add the y Axis
+                            var y = d3.scaleLinear().range([height, 0]).domain([0, 2.5]);
+                            SvG.append("g").call(d3.axisLeft(y));
+
+                            // Compute kernel density estimation
+                            var kde = kernelDensityEstimator(kernelEpanechnikov(0.1), x.ticks(10))
+                            var substitutionMatrix1 = kde(data.filter(function(d) {
+                                    return d.substitutionMatrix === "substitutionMatrix1"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+                            var substitutionMatrix2 = kde(data.filter(function(d) {
+                                    return d.substitutionMatrix === "substitutionMatrix0"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+
+                            // Plot the area A
+                            SvG.append("path")
+                                .attr("class", "mypath")
+                                .datum(substitutionMatrix1)
+                                .attr("fill", "#60f233")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+
+                            // Plot the area B
+                            SvG.append("path")
+                                .attr("class", "mypath")
+                                .datum(substitutionMatrix2)
+                                .attr("fill", "#f5e72a")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+                        });
+
+                    // Handmade legend
+                    SvG.append("circle").attr("cx", 300).attr("cy", 30).attr("r", 6).style("fill", "#60f233")
+                    SvG.append("circle").attr("cx", 300).attr("cy", 60).attr("r", 6).style("fill", "#f5e72a")
+                    SvG.append("text").attr("x", 320).attr("y", 30).text("Pathogenics").style("font-size", "15px").attr("alignment-baseline", "middle")
+                    SvG.append("text").attr("x", 320).attr("y", 60).text("Neutral").style("font-size", "15px").attr("alignment-baseline", "middle")
+
+                    // Function to compute density
+                    function kernelDensityEstimator(kernel, X) {
+                        return function(V) {
+                            return X.map(function(x) {
+                                return [x, d3.mean(V, function(v) {
+                                    return kernel(x - v);
+                                })];
+                            });
+                        };
+                    }
+
+                    function kernelEpanechnikov(k) {
+                        return function(v) {
+                            return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+                        };
+                    }
+                </script>
+            </div>
+            <div id="vdwVolume" class="">
+                <h6>VdwVolume Plot</h6>
+                <script>
+                    // set the dimensions and margins of the graph
+                    var margin = {
+                            top: 30,
+                            right: 30,
+                            bottom: 30,
+                            left: 50
+                        },
+                        width = 460 - margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var Svg = d3.select("#vdwVolume")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    // get the data
+                    d3.csv("https://raw.githubusercontent.com/DevilTrigg3r/ADN_Validate/main/vdwVolume.csv",
+                        function(data) {
+
+                            // add the x Axis
+                            var x = d3.scaleLinear().domain([-10, 115]).range([0, width]);
+                            Svg.append("g").attr("transform", "translate(0," + height + ")")
+                                .call(d3.axisBottom(x));
+
+                            // add the y Axis
+                            var y = d3.scaleLinear().range([height, 0]).domain([0, 0.5]);
+                            Svg.append("g").call(d3.axisLeft(y));
+
+                            // Compute kernel density estimation
+                            var kde = kernelDensityEstimator(kernelEpanechnikov(0.1), x.ticks(30))
+                            var vdwVolume1 = kde(data.filter(function(d) {
+                                    return d.vdwVolume === "vdwVolume1"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+                            var vdwVolume2 = kde(data.filter(function(d) {
+                                    return d.vdwVolume === "vdwVolume0"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+
+                            // Plot the area A
+                            Svg.append("path")
+                                .attr("class", "mypath")
+                                .datum(vdwVolume1)
+                                .attr("fill", "#60f233")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+
+                            // Plot the area B
+                            Svg.append("path")
+                                .attr("class", "mypath")
+                                .datum(vdwVolume2)
+                                .attr("fill", "#f5e72a")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+                        });
+
+                    // Handmade legend
+                    Svg.append("circle").attr("cx", 300).attr("cy", 30).attr("r", 6).style("fill", "#60f233")
+                    Svg.append("circle").attr("cx", 300).attr("cy", 60).attr("r", 6).style("fill", "#f5e72a")
+                    Svg.append("text").attr("x", 320).attr("y", 30).text("Pathogenics").style("font-size", "15px").attr("alignment-baseline", "middle")
+                    Svg.append("text").attr("x", 320).attr("y", 60).text("Neutral").style("font-size", "15px").attr("alignment-baseline", "middle")
+
+                    // Function to compute density
+                    function kernelDensityEstimator(kernel, X) {
+                        return function(V) {
+                            return X.map(function(x) {
+                                return [x, d3.mean(V, function(v) {
+                                    return kernel(x - v);
+                                })];
+                            });
+                        };
+                    }
+
+                    function kernelEpanechnikov(k) {
+                        return function(v) {
+                            return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+                        };
+                    }
+                </script>
+            </div>
+            <div id="hydrophobicity" class="">
+                <h6>Hydrophobicity Plot</h6>
+                <script>
+                    // set the dimensions and margins of the graph
+                    var margin = {
+                            top: 30,
+                            right: 30,
+                            bottom: 30,
+                            left: 50
+                        },
+                        width = 460 - margin.left - margin.right,
+                        height = 400 - margin.top - margin.bottom;
+
+                    // append the svg object to the body of the page
+                    var SVg = d3.select("#hydrophobicity")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                    // get the data
+                    d3.csv("https://raw.githubusercontent.com/DevilTrigg3r/ADN_Validate/main/hydrophobicity.csv",
+                        function(data) {
+
+                            // add the x Axis
+                            var x = d3.scaleLinear().domain([-0.5, 5]).range([0, width]);
+                            SVg.append("g").attr("transform", "translate(0," + height + ")")
+                                .call(d3.axisBottom(x));
+
+                            // add the y Axis
+                            var y = d3.scaleLinear().range([height, 0]).domain([0, 1.2]);
+                            SVg.append("g").call(d3.axisLeft(y));
+
+                            // Compute kernel density estimation
+                            var kde = kernelDensityEstimator(kernelEpanechnikov(0.1), x.ticks(30))
+                            var hydrophobicity1 = kde(data.filter(function(d) {
+                                    return d.hydrophobicity === "hydrophobicity1"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+                            var hydrophobicity2 = kde(data.filter(function(d) {
+                                    return d.hydrophobicity === "hydrophobicity0"
+                                })
+                                .map(function(d) {
+                                    return d.value;
+                                }))
+
+                            // Plot the area A
+                            SVg.append("path")
+                                .attr("class", "mypath")
+                                .datum(hydrophobicity1)
+                                .attr("fill", "#60f233")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+
+                            // Plot the area B
+                            SVg.append("path")
+                                .attr("class", "mypath")
+                                .datum(hydrophobicity2)
+                                .attr("fill", "#f5e72a")
+                                .attr("opacity", ".6")
+                                .attr("stroke", "#000")
+                                .attr("stroke-width", 1)
+                                .attr("stroke-linejoin", "round")
+                                .attr("d", d3.line()
+                                    .curve(d3.curveBasis)
+                                    .x(function(d) {
+                                        return x(d[0]);
+                                    })
+                                    .y(function(d) {
+                                        return y(d[1]);
+                                    })
+                                );
+                        });
+
+                    // Handmade legend
+                    SVg.append("circle").attr("cx", 300).attr("cy", 30).attr("r", 6).style("fill", "#60f233")
+                    SVg.append("circle").attr("cx", 300).attr("cy", 60).attr("r", 6).style("fill", "#f5e72a")
+                    SVg.append("text").attr("x", 320).attr("y", 30).text("Pathogenics").style("font-size", "15px").attr("alignment-baseline", "middle")
+                    SVg.append("text").attr("x", 320).attr("y", 60).text("Neutral").style("font-size", "15px").attr("alignment-baseline", "middle")
+
+                    // Function to compute density
+                    function kernelDensityEstimator(kernel, X) {
+                        return function(V) {
+                            return X.map(function(x) {
+                                return [x, d3.mean(V, function(v) {
+                                    return kernel(x - v);
+                                })];
+                            });
+                        };
+                    }
+
+                    function kernelEpanechnikov(k) {
+                        return function(v) {
+                            return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+                        };
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h4>Plot Line</h4>
+            <div id="PlotLine">
+                <script>
+                    // set the dimensions and margins of the graph
+                    var m = {
+                            top: 30,
+                            right: 10,
+                            bottom: 100,
+                            left: 0
+                        },
+                        width = 1000 - m.left - m.right,
+                        height = 400 - m.top - m.bottom;
+
+                    // append the svg object to the body of the page
+                    var sVG = d3.select("#PlotLine")
+                        .append("svg")
+                        .attr("width", width + m.left + m.right)
+                        .attr("height", height + m.top + m.bottom)
+                        .append("g")
+                        .attr("transform",
+                            "translate(" + m.left + "," + m.top + ")");
+
+                    // Parse the Data
+                    d3.csv("https://raw.githubusercontent.com/DevilTrigg3r/ADN_Validate/main/ReorderedDFToRefValue.csv", function(data) {
+
+                        // Extract the list of dimensions we want to keep in the plot. Here I keep all except the column called Species
+                        dimensions = d3.keys(data[0]).filter(function(d) {
+                            return d != "ref_value"
+                        })
+
+                        // For each dimension, I build a linear scale. I store all in a y object
+                        var y = {}
+                        for (i in dimensions) {
+                            name = dimensions[i]
+                            y[name] = d3.scaleLinear()
+                                .domain(d3.extent(data, function(d) {
+                                    return +d[name];
+                                }))
+                                .range([height, 0])
+                        }
+
+                        // Build the X scale -> it find the best position for each Y axis
+                        x = d3.scalePoint()
+                            .range([0, width])
+                            .padding(1)
+                            .domain(dimensions);
+
+                        // The path function take a row of the csv as input, and return x and y coordinates of the line to draw for this raw.
+                        function path(d) {
+                            return d3.line()(dimensions.map(function(p) {
+                                return [x(p), y[p](d[p])];
+                            }));
+                        }
+
+                        // Draw the lines
+                        sVG
+                            .selectAll("myPath")
+                            .data(data)
+                            .enter().append("path")
+                            .attr("d", path)
+                            .style("fill", "none")
+                            .style("stroke", "#69b3a2")
+                            .style("opacity", 0.5)
+
+                        // Draw the axis:
+                        sVG.selectAll("myAxis")
+                            // For each dimension of the dataset I add a 'g' element:
+                            .data(dimensions).enter()
+                            .append("g")
+                            // I translate this element to its right position on the x axis
+                            .attr("transform", function(d) {
+                                return "translate(" + x(d) + ")";
+                            })
+                            // And I build the axis with the call function
+                            .each(function(d) {
+                                d3.select(this).call(d3.axisLeft().scale(y[d]));
+                            })
+                            // Add axis title
+                            .append("text")
+                            .style("text-anchor", "middle")
+                            .attr("y", -9)
+                            .text(function(d) {
+                                return d;
+                            })
+                            .style("fill", "black")
+                    })
+                </script>
+            </div>
+        </div>
+    </div>
+    <h3>Blossum62/Entropy</h3>
+    <div id="ContourPlot">
+        <script>
+            // set the dimensions and margins of the graph
+            var margin = {
+                    top: 20,
+                    right: 30,
+                    bottom: 30,
+                    left: 40
+                },
+                width = 460 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            // append the svg object to the body of the page
+            var svg = d3.select("#ContourPlot")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // read data
+            d3.csv("https://raw.githubusercontent.com/DevilTrigg3r/ADN_Validate/main/Blossum62-EntropyGroupxy.csv", function(data) {
+
+                // Add X axis
+                var x = d3.scaleLinear()
+                    .domain([-4, 4])
+                    .range([0, width]);
+                svg.append("g")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x));
+
+                // Add Y axis
+                var y = d3.scaleLinear()
+                    .domain([-0.05, 4])
+                    .range([height, 0]);
+                svg.append("g")
+                    .call(d3.axisLeft(y));
+
+                // compute the density data
+                var densityData = d3.contourDensity()
+                    .x(function(d) {
+                        return x(d.x);
+                    }) // x and y = column name in .csv input data
+                    .y(function(d) {
+                        return y(d.y);
+                    })
+                    .size([width, height])
+                    .bandwidth(20) // smaller = more precision in lines = more lines
+                    (data)
+
+                // Add the contour: several "path"
+                svg
+                    .selectAll("path")
+                    .data(densityData)
+                    .enter()
+                    .append("path")
+                    .attr("d", d3.geoPath())
+                    .attr("fill", "none")
+                    .attr("stroke", "#69b3a2")
+                    .attr("stroke-linejoin", "round")
+            })
+        </script>
+    </div>
+    //Scatter Plot
+
+
+
+
+
+  V = VariantDB( variant_variantID ='Q13315-1.4_I960A',variant_variant='I960A',variant_oriAA='I',variant_residue=960,variant_mutAA='A',proteinDB_uniprotID='Q13315-1.4', proteinDB_uniprotIDFK=ATM[0], 
+    predictor_ATM_RF_predictorID = 'ATM_RF-1',
+    predictor_ATM_RF_predictorName = 'ATM_RF',
+    predictor_ATM_RF_score = 1,
+    predictor_ATM_RF_label ='Pathogenic',
+    predictor_ATM_RF_features ="{'features_vdwVolume'=57,}" 
+    ) 
+
+    V.save()
+
+    VariantDB( variant_variantID ='Q13315-1.4_I960F',variant_variant='I960F',variant_oriAA='I',variant_residue=960,variant_mutAA='F',proteinDB_uniprotID='Q13315-1.4', proteinDB_uniprotIDFK=ATM[0], 
+    predictor_ATM_META_predictorID = 'ATM_META-1',
+    predictor_ATM_META_predictorName = 'ATM_META',
+    predictor_ATM_META_score = 1,
+    predictor_ATM_META_label ='Pathogenic',
+    predictor_ATM_META_features ="{features_}" 
+    ) 
+
+</div>
